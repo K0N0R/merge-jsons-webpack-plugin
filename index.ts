@@ -108,7 +108,7 @@ class MergeJsonWebpackPlugin {
      * @param outputPath Output path to write merged json files.
      */
     processFiles = (compilation, files: Array<string>, outputPath) => {
-        const mergedJSON = files.map(file => {
+        const mappedFiles = files.map(file => {
             try {
                 const content = this.readContent(compilation, file);
                 return this.parseJson(file, content.toString());
@@ -117,7 +117,11 @@ class MergeJsonWebpackPlugin {
             }
             return {};
         })
-            .reduce((acc, curr) => this.mergeDeep(acc, curr));
+        if (mappedFiles.length) {
+            const mergedJSON = mappedFiles.reduce((acc, curr) => this.mergeDeep(acc, curr));
+            this.addAssets(compilation, outputPath, JSON.stringify(mergedJSON, null, this.options.space));
+        }
+        const mergedJSON = mappedFiles.reduce((acc, curr) => this.mergeDeep(acc, curr));
         // add assets to compilation.
         this.addAssets(compilation, outputPath, JSON.stringify(mergedJSON, null, this.options.space));
     }
