@@ -7,7 +7,7 @@ const plugin = "MergeJsonWebpackPlugin";
 class MergeJsonWebpackPlugin {
     constructor(options) {
         this.processFiles = (compilation, files, outputPath) => {
-            const mergedJSON = files.map(file => {
+            const mappedFiles = files.map(file => {
                 try {
                     const content = this.readContent(compilation, file);
                     return this.parseJson(file, content.toString());
@@ -17,8 +17,10 @@ class MergeJsonWebpackPlugin {
                 }
                 return {};
             })
-                .reduce((acc, curr) => this.mergeDeep(acc, curr));
-            this.addAssets(compilation, outputPath, JSON.stringify(mergedJSON, null, this.options.space));
+            if (mappedFiles.length) {
+                const mergedJSON = mappedFiles.reduce((acc, curr) => this.mergeDeep(acc, curr));
+                this.addAssets(compilation, outputPath, JSON.stringify(mergedJSON, null, this.options.space));
+            }
         };
         this.readContent = (compilation, fileName) => {
             fileName = fileName.trim();
